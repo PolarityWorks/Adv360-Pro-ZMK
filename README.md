@@ -20,7 +20,7 @@ Certain ZMK features (e.g. combos) require knowing the exact key positions in th
 1. Push a commit to trigger the build.
 2. Download the artifact.
 
-## Building the Firmware in a local container
+## Building the Firmware in a local container (For advanced users only)
 
 ### Setup
 
@@ -46,25 +46,24 @@ The built docker container and compiled firmware files can be deleted with `make
 
 ## Flashing firmware
 
-Follow the programming instruction on page 8 of the [Quick Start Guide](https://kinesis-ergo.com/wp-content/uploads/Advantage360-Professional-QSG-v8-25-22.pdf) to flash the firmware.
+Follow the firmware update instruction guide available [here](https://kinesis-ergo.com/support/kb360pro/#manual)
 
 ### Overview
 
 1. Extract the firmwares from the archive downloaded from the GitHub build job (If using the cloud builder) or the firmware folder (If building locally).
 1. Connect the left side keyboard to USB.
-1. Press Mod+macro1 to put the left side into bootloader mode; it should attach to your computer as a USB drive.
+1. Press the physical reset button on the left side twice in rapid succession with a paperclip to put it into bootloader mode to attach it as a USB drive.
 1. Copy `left.uf2` to the USB drive and it will disconnect.
 1. Power off both keyboards (by unplugging them and making sure the switches are off).
-1. Turn on the left side keyboard with the switch.
 1. Connect the right side keyboard to USB to power it on.
-1. Press Mod+macro3 to put the right side into bootloader mode to attach it as a USB drive.
+1. Press the physical reset button on the right side twice in rapid succession with a paperclip to put it into bootloader mode to attach it as a USB drive.
 1. Copy `right.uf2` to the mounted drive.
-1. Unplug the right side keyboard and turn it back on.
+1. Unplug the right side keyboard and turn both sides back on.
 1. Enjoy!
 
-> Note: There are also physical reset buttons on both keyboards which can be used to enter and exit the bootloader mode. Their location is described in section 2.7 on page 9 in the [User Manual](https://kinesis-ergo.com/wp-content/uploads/Advantage360-ZMK-KB360-PRO-Users-Manual-v3-10-23.pdf) and use is described in section 5.9 on page 14. 
+> Note: The location of the physical reset buttons is described in section 2.2 and section 2.7 of the Advantage 360 Pro user manual (Available [here](https://kinesis-ergo.com/support/kb360pro/#manual)). There is also a key combination (Mod + HK1 for the left side and Mod + HK3 for the right side) however this *only works if the halves are connected to each other*.
 
-> Note: Some operating systems wont always treat the drive as ejected after the settings-reset file is flashed, this doesn't mean that the flashing process has failed.
+> Note: Some operating systems wont always treat the drive as ejected after the settings-reset file is flashed or will give an error saying the copy process has failed, this doesn't mean that the flashing process has failed. For more information please see [the ZMK documentation](https://zmk.dev/docs/troubleshooting#file-transfer-error) on file transfer errors.
 
 ### Upgrading from V2 to V3
 
@@ -76,23 +75,27 @@ Updating from V2.0 based firmwares to V3.0 based firmwares can be a rather compl
 
 Starting on 11/15/2023 the Advantage 360 Pro will now automatically record the compilation date, branch and Git commit hash in a macro that can be accessed with Mod+V. This will type out the following string: YYYYMMDD-XXXX-YYYYYY, where XXXX is the first 4 characters of the Git branch and YYYYYY is the Git commit hash. In addition to this the builds compiled by GitHub actions are now timestamped and also record the commit hash in the filename. 
 
-## Bluetooth LE Privacy
-
-Since the update on 20/10/2023, BLE privacy is now disabled by default and due to an update in upstream ZMK cannot be enabled again as it will cause issues for the split halves connecting to each other. 
-
-Recent updates to MacOS have improved the behaviour for devices without BLE privacy and caused regressions with privacy enabled (e.g. being unable to enter the password on the filevault screen) so BLE privacy is not necessary any more.
-
 ## N-Key Rollover
 
 By default this keyboard has NKRO enabled, however for compatibility reasons the higher ranges are not enabled. If you want to use F13-F24 or the INTL1-9 keys with NKRO enabled you can change `CONFIG_ZMK_HID_KEYBOARD_EXTENDED_REPORT=n` to `CONFIG_ZMK_HID_KEYBOARD_EXTENDED_REPORT=y` in [adv360_left_defconfig](/config/boards/arm/adv360/adv360_left_defconfig#L65)
 
 ## Battery reporting
 
-By default reporting the battery level over BLE is disabled as this can cause some computers to spontaneously wake up repeatedly. If you'd like to enable this functionality change `CONFIG_BT_BAS=n` to  `CONFIG_BT_BAS=y` in [adv360_left_defconfig](/config/boards/arm/adv360/adv360_left_defconfig#L58). Please note that a known bug in windows prevents the battery level from updating by default, it is only updated when the board is paired. A workaround is to set `CONFIG_BT_GATT_ENFORCE_SUBSCRIPTION=n` in [adv360_left_defconfig](/config/boards/arm/adv360/adv360_left_defconfig). This may cause unexpected results on other OSes
+By default reporting the battery level over BLE is disabled as this can cause some computers to spontaneously wake up repeatedly. If you'd like to enable this functionality change `CONFIG_BT_BAS=n` to  `CONFIG_BT_BAS=y` in [adv360_left_defconfig](/config/boards/arm/adv360/adv360_left_defconfig#L58). Please note that a known bug in windows prevents the battery level from updating on older versions of windows, it is only updated when the board is paired. A workaround is to set `CONFIG_BT_GATT_ENFORCE_SUBSCRIPTION=n` in [adv360_left_defconfig](/config/boards/arm/adv360/adv360_left_defconfig). This may cause unexpected results on other OSes
 
 ## Changelog
 
 The changelog for both the config repo and the underlying ZMK fork that the config repo builds against can be found [here](CHANGELOG.md).
+
+## Troubleshooting
+
+If you're having issues with your Advantage 360 Pro there are several things you can try. The most common issues we see users encountering are Bluetooth connection issues to the host PC. You can try unpairing from the device (Mod + win with the factory keymap) and unpairing on the host and connecting again, or check the [issues](https://github.com/KinesisCorporation/Adv360-Pro-ZMK/issues) to see if other users are experiencing the same problem as you and if there are any solutions
+
+If you're having problems getting your firmware to compile (A red X in the GitHub build action page or emails about build failures) you can check some useful advice [here](https://zmk.dev/docs/troubleshooting#west-build-errors)
+
+There are other troubleshooting resources hosted here: https://kinesis-ergo.com/support/kb360pro/#troubleshooting
+
+The latest factory firmware can be found heere if you'd like to restore your keyboard to factory settings: https://kinesis-ergo.com/support/kb360pro/#firmware-updates
 
 ## Beta testing
 
@@ -108,12 +111,15 @@ By default this config repository references [a customised version of ZMK](https
 
 Whilst the Advantage 360 Pro is compatible with base ZMK (The pull request to merge it can be seen [here](https://github.com/zmkfirmware/zmk/pull/1454) if you want to see how to implement it) some of the more advanced features (the indicator RGB leds) will not work, and Kinesis cannot provide customer service for usage of base ZMK. Likewise the ZMK community cannot provide support for either the Kinesis keymap editor, nor any usage of the Kinesis custom fork.
 
-## Other support
+## Escalated support
 
 Further support resources can be found on Kinesis.com:
 
 * https://kinesis-ergo.com/support/kb360pro/#firmware-updates
 * https://kinesis-ergo.com/support/kb360pro/#manuals
 
+If you're encountering a specific reproducible issue with the hardware or software you can open a GitHub ticket.
+* https://github.com/KinesisCorporation/Adv360-Pro-ZMK/issues/new
+
 In the event of a hardware issue it may be necessary to open a support ticket directly with Kinesis as opposed to a GitHub issue in this repository.
-* https://kinesis-ergo.com/support/kb360pro/#ticket
+* https://kinesis-ergo.com/support/contact-a-technician/
